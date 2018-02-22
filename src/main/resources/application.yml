@@ -1,15 +1,15 @@
 # 외부 DB 설정시 아래의 주석을 활성화 시킨 후 관련 DB 설정 정보를 입력한다.
-spring:
-  datasource:
-    initialize: true
-    url: jdbc:h2:tcp://localhost/~/ctcTest;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
+#spring:
+#  datasource:
+#    initialize: true
+#    url: jdbc:h2:tcp://localhost/~/ctc;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    driverClassName: org.h2.Driver
+#    username: sa
+#    password:
 
-#spring.h2.console:
-#  enabled: true
-#  path: /h2-console
+spring.h2.console:
+  enabled: true
+  path: /h2-console
 
 security:
   user:
