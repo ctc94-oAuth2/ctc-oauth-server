@@ -164,8 +164,8 @@ class TestController {
 				"-F \"scope=read\" " + 
 				"-F \"client_id=foo\" " + 
 				"-F \"client_secret=bar\" " + 
-				"-F \"redirect_uri=http://localhost:8080/test/authorization-code\" " + 
-				"\"http://foo:bar@localhost:8080/oauth/token\"", code);
+				"-F \"redirect_uri=http://localhost:9090/test/authorization-code\" " + 
+				"\"http://foo:bar@localhost:9090/oauth/token\"", code);
 		return curl;
 	} 
 } 
