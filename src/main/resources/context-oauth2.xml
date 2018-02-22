@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 
+        http://www.springframework.org/schema/security/spring-security-oauth2.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/util 
+        http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd "
+>
+    <util:properties id="oauth2" location="classpath:/app/config/oauth2.properties"/>
+    <!-- use-expressions="true" 로 설정하면 SpEL을 사용해서 작성을 해야한다. 그렇지 않으면 에러가 발생한다. -->
+    <!-- auto-config="true"는 자동 기본 설정 -->
+    <sec:http use-expressions="true" entry-point-ref="clientAuthenticationEntryPoint">
+        <sec:http-basic/>
+        <sec:logout/>
+        <sec:anonymous enabled="false"/>
+ 
+        <sec:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+        <!-- This is the crucial part and the wiring is very important -->
+        <sec:custom-filter ref="oauth2ClientContextFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+        <sec:custom-filter ref="oAuth2AuthenticationProcessingFilter" before="FILTER_SECURITY_INTERCEPTOR"/>
+    </sec:http>
+    
+    <sec:authentication-manager id="authenticationManager" />
+ 
+    <oauth2:resource id="resource" type="#{oauth2['oauth.type']}" client-id="#{oauth2['oauth.clientId']}" client-secret="#{oauth2['oauth.clientSecret']}"
+        user-authorization-uri="#{oauth2['oauth.authorize']}" access-token-uri="#{oauth2['oauth.token']}" scope="#{oauth2['oauth.scope']}" />
+ 
+    <oauth2:rest-template id="restTemplate" resource="resource" />
+    
+    <oauth2:client id="oauth2ClientContextFilter" />
+    
+    <!-- Token Services that verifies tokens on a remote Authorization Server -->
+    <bean id="tokenServices" class="com.sewon.anyone.app.common.service.impl.UserInfoTokenServices">
+        <constructor-arg name="userInfoEndpointUrl" value="#{oauth2['oauth.userInfoEndpointUrl']}" />
+        <constructor-arg name="clientId" value="#{oauth2['oauth.clientId']}" />
+        <property name="restTemplate" ref="restTemplate" />
+    </bean>
+    
+    <!-- 토큰 획득하고 세션을 채운다 -->
+    <bean id="oAuth2AuthenticationProcessingFilter" class="org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter">
+        <constructor-arg name="defaultFilterProcessesUrl" value="/login"/>
+        <property name="restTemplate" ref="restTemplate"/>
+        <property name="tokenServices" ref="tokenServices"/>
+    </bean>
+    <!--  -->
+    <bean id="clientAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <property name="loginFormUrl" value="/login"/>
+    </bean>
+  
+</beans>
